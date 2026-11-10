@@ -1,64 +1,73 @@
-
-const lessons = window.GJ_LESSONS;
-const $ = (id) => document.getElementById(id);
-const state = JSON.parse(localStorage.getItem('gj-a1-progress') || '{"completed":[],"quizScores":{}}');
-let currentLesson = null;
-function save(){localStorage.setItem('gj-a1-progress',JSON.stringify(state));renderProgress();renderNav();}
-function renderProgress(){
-  const n=state.completed.length, pct=Math.round(n/lessons.length*100);
-  $('completedCount').textContent=n; $('progressPercent').textContent=pct+'%';
-  $('progressBar').style.width=pct+'%'; $('headerProgress').textContent=n+'/20'; $('sideCount').textContent=n+'/20';
-  $('progressCaption').textContent=n===20?'A1 complete — wunderbar!':n===0?'Every lesson is a step forward. Start wherever you like.':`${20-n} lessons left in your A1 learning path. Keep going at your own pace.`;
+(() => {
+const course = window.GERMAN_JOURNEY_A1;
+const $ = (s) => document.querySelector(s);
+const storageKey = "germanJourneyA1Progress_v2";
+let progress = {};
+try { progress = JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch (_) { progress = {}; }
+let current = null;
+const save = () => { try { localStorage.setItem(storageKey, JSON.stringify(progress)); } catch (_) {} updateProgress(); };
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");
+function articleClass(a){ if(a==="der") return "article-der"; if(a==="die") return "article-die"; if(a==="das") return "article-das"; return "article-plural"; }
+function updateProgress(){
+ const done = course.lessons.filter(l=>progress[l.id]?.completed).length;
+ $("#progress-label").textContent = `${done} / 20 lessons completed`;
+ $("#progress-percent").textContent = `${Math.round(done/20*100)}% complete`;
+ $("#progress-bar").style.width = `${done/20*100}%`;
+ document.querySelectorAll(".lesson-link").forEach(b=>{
+   const id=Number(b.dataset.id); b.classList.toggle("done",!!progress[id]?.completed);
+   b.querySelector(".lesson-num").textContent = progress[id]?.completed ? "✓" : id;
+ });
 }
-function renderNav(){
-  $('lessonNav').innerHTML=lessons.map(l=>`<button class="${state.completed.includes(l.id)?'done':''} ${currentLesson?.id===l.id?'selected':''}" data-id="${l.id}"><span class="lesson-num">${state.completed.includes(l.id)?'✓':l.id}</span><span class="lesson-name">${l.title}</span></button>`).join('');
-  document.querySelectorAll('#lessonNav button').forEach(b=>b.onclick=()=>openLesson(+b.dataset.id));
+function buildNav(){
+ $("#lesson-nav").innerHTML = course.lessons.map(l=>`<button class="lesson-link" data-id="${l.id}"><span class="lesson-num">${l.id}</span><span>${esc(l.title)}</span></button>`).join("");
+ document.querySelectorAll(".lesson-link").forEach(b=>b.addEventListener("click",()=>openLesson(Number(b.dataset.id))));
+ updateProgress();
 }
-function renderCards(){
-  $('lessonCards').innerHTML=lessons.map(l=>`<button class="lesson-card ${state.completed.includes(l.id)?'completed':''}" data-id="${l.id}"><span class="card-number">${state.completed.includes(l.id)?'✓':String(l.id).padStart(2,'0')}</span><span class="card-copy"><strong>${l.title}</strong><span>${l.goal}</span></span><span class="card-status">${state.completed.includes(l.id)?'✓':'→'}</span></button>`).join('');
-  document.querySelectorAll('.lesson-card').forEach(b=>b.onclick=()=>openLesson(+b.dataset.id));
-}
-function show(view){
-  ['dashboardView','lessonView','reviewView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));
-  $('courseNav').classList.toggle('active',view==='dashboardView'||view==='lessonView');
-  $('reviewNav').classList.toggle('active',view==='reviewView');
-}
-function articleHTML(word){
-  return word.replace(/\b(der)\b/g,'<span class="article-der">der</span>').replace(/\b(die)\b/g,'<span class="article-die">die</span>').replace(/\b(das)\b/g,'<span class="article-das">das</span>');
-}
+function card(title,body,extra=""){return `<section class="section-card ${extra}"><h2>${title}</h2>${body}</section>`;}
 function openLesson(id){
-  const l=lessons.find(x=>x.id===id); if(!l)return; currentLesson=l; show('lessonView'); renderNav();
-  const vocab=l.vocab.map(v=>`<tr><td>${articleHTML(v[0])}</td><td>${v[1]==='—'?'—':v[1]}</td><td>${v[2]}</td></tr>`).join('');
-  const examples=l.examples.map(x=>`<div class="example">${x}</div>`).join('');
-  const dialogue=l.dialogue.map(x=>`<div class="dialogue-line">${x}</div>`).join('');
-  const practice=l.practice.map(x=>`<div class="practice-item">${x}</div>`).join('');
-  const quiz=l.quiz?.length?`<section class="content-card" id="quiz"><h2>Quick check</h2><form id="quizForm">${l.quiz.map((q,i)=>`<div class="quiz-question"><strong>${i+1}. ${q[0]}</strong><div class="quiz-options">${q[1].map((o,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join('')}</div></div>`).join('')}<button class="primary-btn" type="submit">Check answers</button><div id="quizResult"></div></form></section>`:'';
-  $('lessonView').innerHTML=`
-    <button class="back-link" id="backBtn">← Back to A1 overview</button>
-    <div class="lesson-header"><p class="eyebrow">A1 · LESSON ${String(l.id).padStart(2,'0')}</p><h1>${l.title}</h1><p class="lesson-de">${l.de}</p><p class="lesson-meta">${l.goal}</p><div class="lesson-actions"><button class="primary-btn" id="completeBtn">${state.completed.includes(l.id)?'✓ Completed':'Mark lesson complete'}</button><button class="secondary-btn" id="prevBtn" ${l.id===1?'disabled':''}>← Previous</button><button class="secondary-btn" id="nextBtn" ${l.id===20?'disabled':''}>Next lesson →</button></div></div>
-    <div class="lesson-layout"><div class="lesson-sections">
-      <section class="content-card"><h2>Grammar and explanation</h2><p>${l.grammar.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</p></section>
-      <section class="content-card"><h2>Vocabulary</h2><table class="vocab-table"><thead><tr><th>GERMAN</th><th>PLURAL</th><th>ENGLISH</th></tr></thead><tbody>${vocab}</tbody></table><p class="small-muted" style="margin-top:12px">Article colours: <span class="article-der">der · blue</span> &nbsp; <span class="article-die">die · red</span> &nbsp; <span class="article-das">das · green</span></p></section>
-      <section class="content-card"><h2>Examples</h2><div class="example-list">${examples}</div></section>
-      <section class="content-card"><h2>Everyday conversation</h2>${dialogue}</section>
-      <section class="content-card"><h2>Practice</h2>${practice}</section>
-      ${quiz}
-    </div><aside class="lesson-aside"><h3>Your A1 journey</h3><strong>${state.completed.length} / 20 complete</strong><div class="mini-progress"><div style="width:${state.completed.length/20*100}%"></div></div><p>Study the explanation, say the examples aloud, then complete the practice and quiz. Mark the lesson complete when you're ready.</p><button class="secondary-btn" id="asideReview">Review vocabulary</button></aside></div>`;
-  $('backBtn').onclick=()=>{show('dashboardView');renderCards();};
-  $('completeBtn').onclick=()=>{if(!state.completed.includes(l.id))state.completed.push(l.id);save();openLesson(l.id);};
-  $('prevBtn').onclick=()=>openLesson(l.id-1); $('nextBtn').onclick=()=>openLesson(l.id+1);
-  $('asideReview').onclick=()=>openReview();
-  if(l.quiz?.length) $('quizForm').onsubmit=(e)=>{e.preventDefault();let score=0,answered=0;l.quiz.forEach((q,i)=>{const picked=document.querySelector(`input[name="q${i}"]:checked`);if(picked){answered++;if(+picked.value===q[2])score++;}});$('quizResult').innerHTML=`<div class="quiz-result">You scored ${score} / ${l.quiz.length}${answered<l.quiz.length?` · ${l.quiz.length-answered} unanswered`:''}. ${score===l.quiz.length?'Excellent work!':'Review the lesson and try again.'}</div>`;state.quizScores[l.id]=score;save();};
-  window.scrollTo({top:0,behavior:'smooth'});
+ const l=course.lessons.find(x=>x.id===id); if(!l)return; current=id;
+ $("#welcome").classList.add("hidden"); $("#lesson-view").classList.remove("hidden");
+ document.querySelectorAll(".lesson-link").forEach(b=>b.classList.toggle("active",Number(b.dataset.id)===id));
+ const grammar=l.grammar.map((g,i)=>`<div class="grammar-point"><strong>${i+1}. ${esc(g[0])}</strong><p>${md(g[1])}</p></div>`).join("");
+ const vocab=l.vocab.map(v=>`<tr><td class="word"><span class="${articleClass(v[1])}">${esc(v[1])}</span> ${esc(v[0])}</td><td>${esc(v[2])}</td><td class="translation">${esc(v[3])}</td><td>${esc(v[4])}</td></tr>`).join("");
+ const examples=l.examples.map(e=>`<div class="example"><div class="de">${esc(e[0])}</div><div class="en">${esc(e[1])}</div></div>`).join("");
+ const dialogue=l.dialogue.map(d=>`<div class="line"><div class="speaker">${esc(d[0])}</div><p>${esc(d[1])}</p></div>`).join("");
+ const readqs=l.reading_questions.map(q=>`<div class="qa"><strong>${esc(q[0])}</strong><span>${esc(q[1])}</span></div>`).join("");
+ const exercises=l.exercises.map((e,i)=>`<div class="exercise" data-ex="${i}"><p class="exercise-q">${i+1}. ${esc(e[0])}</p><div class="options">${[e[2],e[3],e[4]].map((op,j)=>`<button class="option" data-choice="${j}">${esc(op)}</button>`).join("")}</div><p class="feedback" aria-live="polite"></p><div class="answer"><strong>Answer: ${esc(e[5])}</strong><br>${esc(e[6])}</div></div>`).join("");
+ const review=(l.review||[]).map(x=>`<li>${esc(x)}</li>`).join("");
+ const done=!!progress[id]?.completed;
+ $("#lesson-view").innerHTML=`
+ <header class="lesson-header"><div class="lesson-kicker">A1 · LESSON ${String(id).padStart(2,"0")} OF 20</div><h1>${esc(l.title)}</h1><div class="de-title">${esc(l.de)}</div><p class="goal"><strong>Learning goal:</strong> ${esc(l.goal)}</p><div class="complete-row"><span class="section-intro">Work through the sections at your own pace.</span><button id="complete-btn" class="complete-btn ${done?"done":""}">${done?"✓ Lesson completed":"Mark lesson complete"}</button></div></header>
+ ${card("1. Grammar explained",grammar)}
+ ${card("2. Vocabulary",`<p class="section-intro">Learn nouns together with their article and plural. Article colours: <span class="article-der">der · masculine</span>, <span class="article-die">die · feminine</span>, <span class="article-das">das · neuter</span>. Plural definite article: <span class="article-plural">die</span>.</p><div class="vocab-wrap"><table><thead><tr><th>German</th><th>Plural</th><th>English</th><th>Example</th></tr></thead><tbody>${vocab}</tbody></table></div>`)}
+ ${card("3. Useful example sentences",`<div class="example-list">${examples}</div>`)}
+ ${card("4. Conversation",`<p class="section-intro">Read the dialogue once for meaning. Then practise both roles aloud.</p><div class="dialogue">${dialogue}</div>`)}
+ ${card("5. Reading comprehension",`<h3>${esc(l.reading_title)}</h3><p class="reading-text">${esc(l.reading)}</p><h3>Check your understanding</h3>${readqs}`)}
+ ${card("6. Writing task",`<div class="writing-box"><p>${esc(l.writing)}</p><p class="section-intro">After writing, check: verb position · capital letters · noun articles · spelling · full stops.</p></div>`)}
+ ${card("7. Speaking practice",`<div class="activity"><h3>Speak aloud</h3><p>${esc(l.speaking)}</p></div>`)}
+ ${card("8. Listening and pronunciation",`<div class="activity"><h3>Listening task</h3><p>${esc(l.listening)}</p><p class="section-intro">Tip: Use your browser’s read-aloud feature or a German text-to-speech voice. Audio recordings are not built into this version yet.</p></div>`)}
+ ${card("9. Practice and knowledge check",`<p class="section-intro">Choose an answer to see feedback and an explanation. There are ${l.exercises.length} questions in this lesson.</p>${exercises}`)}
+ ${card("10. Review before you finish",`<ul>${review}</ul>`)}
+ <div class="complete-row"><button class="secondary-btn" id="prev-btn" ${id===1?"disabled":""}>← Previous lesson</button><button id="complete-btn-bottom" class="complete-btn ${done?"done":""}">${done?"✓ Completed":"Mark complete"}</button></div>
+ <div class="next-row"><button class="primary-btn" id="next-btn" ${id===20?"disabled":""}>${id===20?"A1 course complete":"Next lesson →"}</button></div>`;
+ $("#complete-btn").addEventListener("click",()=>toggleDone(id));
+ $("#complete-btn-bottom").addEventListener("click",()=>toggleDone(id));
+ $("#prev-btn").addEventListener("click",()=>openLesson(id-1));
+ $("#next-btn").addEventListener("click",()=>{if(id<20)openLesson(id+1);});
+ document.querySelectorAll(".exercise").forEach((box,i)=>{
+   box.querySelectorAll(".option").forEach(btn=>btn.addEventListener("click",()=>{
+     const ex=l.exercises[i], choice=Number(btn.dataset.choice);
+     const correct=btn.textContent===ex[5];
+     box.querySelectorAll(".option").forEach(x=>{x.disabled=true;if(x.textContent===ex[5])x.classList.add("correct");});
+     if(!correct)btn.classList.add("wrong");
+     box.querySelector(".feedback").textContent=correct?"Correct — well done.":"Not quite. Review the explanation below.";
+     box.querySelector(".answer").classList.add("show");
+   }));
+ });
+ window.scrollTo({top:0,behavior:"smooth"});
 }
-function openReview(){
-  currentLesson=null;show('reviewView');
-  const all=lessons.flatMap(l=>l.vocab.map(v=>({word:v[0],plural:v[1],meaning:v[2],lesson:l.id})));
-  $('reviewView').innerHTML=`<button class="back-link" id="reviewBack">← Back to A1 overview</button><p class="eyebrow">A1 VOCABULARY</p><h1 style="font:800 30px Manrope;margin:0 0 8px">Vocabulary review</h1><p class="subheading" style="margin-bottom:22px">Review words from all 20 A1 lessons. Learn nouns together with their article and plural.</p><div class="review-list">${all.map(v=>`<div class="review-row"><div><strong>${articleHTML(v.word)}</strong><div><span>${v.plural==='—'?'':v.plural}</span></div></div><span>${v.meaning} · L${v.lesson}</span></div>`).join('')}</div>`;
-  $('reviewBack').onclick=()=>{show('dashboardView');renderCards();};
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-$('courseNav').onclick=()=>{show('dashboardView');renderCards();};
-$('reviewNav').onclick=openReview;
-$('homeLink').onclick=(e)=>{e.preventDefault();show('dashboardView');renderCards();};
-renderProgress();renderNav();renderCards();
+function toggleDone(id){progress[id]=progress[id]||{};progress[id].completed=!progress[id].completed;save();openLesson(id);}
+$("#start-btn").addEventListener("click",()=>openLesson(1));
+buildNav();
+})();

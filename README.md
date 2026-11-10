@@ -1,40 +1,26 @@
-# German Journey — A1 prototype
+# German Journey — A1 Full Course Package
 
-A calm, responsive, browser-based German A1 learning prototype.
+This package replaces the earlier condensed A1 prototype with an expanded A1 course website.
 
-## Included
-- 20 A1 lesson pages with grammar notes, vocabulary, examples, short dialogues and practice tasks
-- Quick quizzes with instant scoring
-- A1 lesson navigation and completion tracking
-- Vocabulary review across the A1 course
-- Local progress saved in the browser with `localStorage`
-- Article colour key: der = blue, die = red, das = green
-- Responsive layout for desktop and mobile
+## Files
+- `index.html` — website structure
+- `styles.css` — responsive styling
+- `lessons.js` — structured A1 course content for all 20 lessons
+- `app.js` — lesson navigation, rendering, quizzes and local progress
+- `README.md` — these instructions
 
-## Run locally
-No build tools or package installation are required.
+## Publish on GitHub Pages
+1. Open your `german-journey` repository.
+2. Upload these five files to the repository root, replacing the existing files with the same names.
+3. Commit the changes to the `main` branch.
+4. Keep GitHub Pages set to **Deploy from a branch → main → /(root)**.
+5. Wait for GitHub Pages to redeploy, then refresh your website.
 
-1. Download and unzip this project.
-2. Open `index.html` in a modern browser.
-3. Your progress is saved in that browser on that device.
+## Progress saving
+Lesson completion is saved in the browser's local storage on the current device and browser. It is not yet connected to accounts or cloud synchronisation. Clearing browser data may erase it.
 
-For the Google Fonts import, an internet connection is needed; the app itself works without it using fallback fonts.
+## Important scope notes
+This is an expanded A1 teaching-content release, not the final 80-lesson product. It includes grammar explanations, vocabulary with articles and plurals, example sentences, dialogues, reading passages, writing and speaking tasks, listening guidance, review activities and interactive multiple-choice checks. Some listening activities use read-aloud/text-to-speech guidance; recorded audio and speech recognition are not included yet. The site has not been connected to user accounts or a cloud database.
 
-## Publish with GitHub Pages
-1. Create or open your GitHub repository.
-2. Upload all files and folders from this project to the repository root (not just the ZIP).
-3. Commit the files to the `main` branch.
-4. In GitHub, open **Settings → Pages**.
-5. Under **Build and deployment**, choose **Deploy from a branch**.
-6. Select branch `main` and folder `/ (root)`, then save.
-7. Wait for GitHub Pages to publish the site. The published URL will appear in the Pages settings.
-
-## Important prototype notes
-- This is a first A1 prototype, not the finished German Journey product.
-- The lesson material is an initial structured version. It should be reviewed and expanded before public launch.
-- Progress is stored locally in the browser; it is not synchronised between devices or accounts.
-- There is no login, cloud database, audio recording, speech recognition or spaced-repetition scheduler in this prototype.
-- The remaining levels (A2, B1 and B2) can be added later using the same lesson data structure.
-
-## Updating later
-Add new lessons to `lessons.js` using the same fields (`id`, `title`, `de`, `goal`, `grammar`, `vocab`, `examples`, `dialogue`, `practice`, `quiz`). The app automatically renders them in the course list; progress totals and labels should then be adjusted for the expanded curriculum.
+## Browser use
+For local testing, open `index.html` in a modern browser. No installer or build process is required. Google Fonts is optional; system fonts are used as fallback.

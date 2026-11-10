@@ -1,47 +1,40 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f6f7f4">
-  <meta name="description" content="German Journey — a calm, structured A1 German learning experience.">
-  <title>German Journey · A1</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="German Journey A1 — a structured German course with grammar, vocabulary, reading, writing, speaking and practice.">
+<title>German Journey — A1 German Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#" id="homeLink"><span class="brand-mark">G</span><span>German <b>Journey</b></span></a>
-    <div class="top-meta"><span class="level-pill">A1 · Beginner</span><span class="streak" aria-label="Your learning progress">✦ <b id="headerProgress">0/20</b></span></div>
-  </header>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="sidebar-heading">YOUR COURSE</div>
-      <button class="nav-link active" id="courseNav"> <span>▦</span> A1 Course</button>
-      <button class="nav-link" id="reviewNav"><span>↻</span> Review vocabulary</button>
-      <div class="sidebar-heading lessons-heading">LESSONS <span id="sideCount">0/20</span></div>
-      <nav id="lessonNav" class="lesson-nav" aria-label="A1 lessons"></nav>
-      <div class="sidebar-note"><span>🌱</span><p>Learn at your own pace.<br>No deadlines. No pressure.</p></div>
-    </aside>
-    <main id="main" class="main-content">
-      <section id="dashboardView">
-        <div class="welcome-row">
-          <div><p class="eyebrow">YOUR GERMAN COURSE</p><h1>Hallo! Ready to learn?</h1><p class="subheading">A steady, practical path from beginner to confident German.</p></div>
-          <div class="hero-art" aria-hidden="true"><span>Guten<br><b>Tag!</b></span><i>✦</i></div>
-        </div>
-        <section class="progress-card">
-          <div class="progress-top"><div><span class="muted-label">YOUR A1 PROGRESS</span><h2><span id="completedCount">0</span> of 20 lessons completed</h2></div><span class="progress-percent" id="progressPercent">0%</span></div>
-          <div class="progress-track"><div id="progressBar"></div></div>
-          <p class="progress-caption" id="progressCaption">Every lesson is a step forward. Start wherever you like.</p>
-        </section>
-        <div class="section-title-row"><div><p class="eyebrow">THE BEGINNER LEVEL</p><h2>Your A1 learning path</h2></div><span class="small-muted">20 lessons</span></div>
-        <div id="lessonCards" class="lesson-grid"></div>
-        <footer class="dashboard-footer">German Journey · Built for consistent, enjoyable learning.</footer>
-      </section>
-      <section id="lessonView" class="hidden"></section>
-      <section id="reviewView" class="hidden"></section>
-    </main>
-  </div>
-  <script src="lessons.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+<header class="topbar">
+  <a class="brand" href="#" aria-label="German Journey home"><span class="brand-mark">GJ</span><span>German Journey</span></a>
+  <div class="top-meta"><span class="level-pill">A1 · Beginner</span><span id="progress-label">0 / 20 lessons completed</span></div>
+</header>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="side-heading">YOUR COURSE</div>
+    <div class="course-progress"><div class="progress-track"><div id="progress-bar"></div></div><small id="progress-percent">0% complete</small></div>
+    <nav id="lesson-nav" aria-label="A1 lessons"></nav>
+    <div class="sidebar-note"><strong>Small steps add up.</strong><br>Learn at your own pace. Your progress is saved in this browser.</div>
+  </aside>
+  <main id="main-content">
+    <section class="welcome" id="welcome">
+      <div class="eyebrow">GERMAN JOURNEY · A1</div>
+      <h1>Build your German, <em>one lesson at a time.</em></h1>
+      <p>A complete beginner course with clear grammar, useful vocabulary and practical activities for everyday life.</p>
+      <div class="welcome-stats"><div><strong>20</strong><span>lessons</span></div><div><strong>400+</strong><span>vocabulary entries</span></div><div><strong>4 skills</strong><span>plus grammar</span></div></div>
+      <button class="primary-btn" id="start-btn">Start lesson 1 <span>→</span></button>
+      <p class="privacy-note">Progress is stored locally in this browser. It is not yet synchronised across devices.</p>
+    </section>
+    <article id="lesson-view" class="lesson-view hidden"></article>
+  </main>
+</div>
+<footer><span>German Journey</span><span>Learn steadily. Speak confidently.</span></footer>
+<script src="lessons.js"></script>
+<script src="app.js"></script>
+</body></html>
